@@ -1,13 +1,20 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace Diana_Project.Areas.Manage.Controllers
+﻿namespace Diana_Project.Areas.Manage.Controllers
 {
     [Area("Manage")]
     public class SliderController : Controller
     {
+        AppDbContext _context;
+        IWebHostEnvironment _env;
+        public SliderController(AppDbContext context, IWebHostEnvironment env)
+        {
+            _context = context;
+            _env = env;
+        }
+
         public IActionResult Index()
         {
-            return View();
+            List<Slider> sliderList = _context.Sliders.ToList();
+            return View(sliderList);
         }
         public IActionResult Create()
         {
@@ -16,19 +23,64 @@ namespace Diana_Project.Areas.Manage.Controllers
         [HttpPost]
         public IActionResult Create(Slider slider)
         {
-            return View();
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+            if(!slider.ImageFile.ContentType.Contains("image"))
+            {
+                ModelState.AddModelError("ImageFile", "Yalnizca Sekil yukluye bilersiz");
+                return View();
+            }
+
+            slider.ImgUrl = slider.ImageFile.Upload(_env.WebRootPath, @"\Upload\SliderImage");
+
+            _context.Sliders.Add(slider);
+            _context.SaveChanges();
+
+            return RedirectToAction("Index");
         }
-        public IActionResult Update()
+        public IActionResult Update(int id)
         {
-            return View();
+            Slider slider = _context.Sliders.FirstOrDefault(p=>p.Id == id);
+
+            UpdateSliderVm updateSliderVm = new UpdateSliderVm()
+            {
+                Title=slider.Title,
+                SubTitle=slider.SubTitle,
+                ImgUrl=slider.ImgUrl,
+            };
+            return View(updateSliderVm);
         }
         [HttpPost]
-        public IActionResult Update(Slider newSlider)
+        public IActionResult Update(UpdateSliderVm newSlider)
         {
-            return View();
+            if(ModelState.IsValid)
+            {
+                return View();
+            }
+            Slider oldSlider = _context.Sliders.FirstOrDefault(p=>p.Id == newSlider.Id);
+            oldSlider.Title = newSlider.Title;
+            oldSlider.SubTitle = newSlider.SubTitle;
+            if (newSlider.ImageFile != null)
+            {
+                if (!newSlider.ImageFile.CheckType("image/"))
+                {
+                    ModelState.AddModelError("MainPhoto", "Duzgun formatda sekil daxil edin!");
+                    return View();
+                }
+                newSlider.ImageFile.Upload(_env.WebRootPath, @"\Upload\SliderImage\");
+                oldSlider.ImgUrl.DeleteFile(_env.WebRootPath, @"\Upload\SliderImage");
+                oldSlider.ImgUrl = newSlider.ImgUrl;
+            }
+            return RedirectToAction("Index");
         }
-        public IActionResult Delete()
+        public IActionResult Delete(int id)
         {
+            var slider = _context.Sliders.FirstOrDefault(s => s.Id == id);
+            _context.Sliders.Remove(slider);
+            _context.SaveChanges();
+            FileManager.DeleteFile(slider.ImgUrl, _env.WebRootPath, @"\Upload\SliderImage\");
             return View();
         }
     }

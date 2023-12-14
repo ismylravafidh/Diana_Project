@@ -6,3 +6,5 @@ global using Microsoft.AspNetCore.Identity;
 global using Diana_Project.DAL;
 global using Diana_Project.Areas.Manage.ViewModels.Product;
 global using Microsoft.AspNetCore.Mvc;
+global using Diana_Project.Helpers;
+global using Diana_Project.Areas.Manage.ViewModels.Slider;

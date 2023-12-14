@@ -1,7 +1,5 @@
 ﻿@model List<Material>
-@{
-    int count = 0;
-}
+
 <div class="container">
     <div class="d-flex" style="justify-content:space-between;align-items:center">
         <h1>Materials</h1>
@@ -18,9 +16,7 @@
         <tbody>
             @foreach (var item in Model)
             {
-                count++;
                 <tr>
-                    <th scope="row">@count</th>
                     <td>@item.Id</td>
                     <td>@item.Name</td>
                     <td>
