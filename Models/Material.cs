@@ -3,6 +3,6 @@
     public class Material : BaseEntity
     {
         public string Name { get; set; }
-        List<ProductMaterial> ProductMaterials { get; set; }
+        public List<ProductMaterial> ProductMaterials { get; set; }
     }
 }
